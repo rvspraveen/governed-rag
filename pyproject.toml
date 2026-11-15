@@ -23,7 +23,7 @@ classifiers = [
 ]
 dependencies = [
   # Exact pin: haiku.rag ships almost daily. Upgrades only via a PR that passes the leak eval.
-  "haiku.rag-slim==0.111.0",
+  "haiku.rag-slim==0.111.1",
   "pyyaml>=6.0",
   "rich>=13.0",
 ]
