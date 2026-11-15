@@ -2,6 +2,8 @@
 
 **Permission-aware RAG on [haiku.rag](https://github.com/ggozad/haiku.rag).** Every user gets answers cited only from documents they are allowed to read. A leak eval in CI has to stay at zero, and a drift report fails the build when a document quietly becomes readable by more people.
 
+**Write-up:** [Why retrieval has to know who is asking](docs/writeup.md)
+
 [![CI](https://github.com/rvspraveen/governed-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/rvspraveen/governed-rag/actions/workflows/ci.yml)
 ![Python 3.12 to 3.14](https://img.shields.io/badge/python-3.12%20to%203.14-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)

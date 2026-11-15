@@ -9,9 +9,9 @@ permissions:
   contents: read
 
 env:
-  # The contract gate is installed from its release tag; rag-eval-gate from main until it is tagged.
+  # Both gates are installed from their release tags.
   RCC: "corpusgate @ git+https://github.com/rvspraveen/corpusgate@v0.2.0"
-  REG: "rag-eval-gate @ git+https://github.com/rvspraveen/rag-eval-gate@main"
+  REG: "rag-eval-gate @ git+https://github.com/rvspraveen/rag-eval-gate@v0.1.0"
 
 jobs:
   test:
