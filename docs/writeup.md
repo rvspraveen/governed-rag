@@ -14,7 +14,7 @@ The test suite switches each layer off in turn and proves the other still blocks
 
 Identity is request-scoped. haiku.rag's hooks receive the client and the search request, not the caller, so a `ContextVar` carries the current user and labels for the asyncio task. `--as USER` is taken at face value: governed-rag decides what a known user may read; it does not authenticate anyone.
 
-The retrieval engine underneath is [haiku.rag](https://github.com/ggozad/haiku.rag) (MIT, by Yiorgis Gozadinos), pinned exactly at `haiku.rag-slim==0.111.0` and used unmodified through its public API. governed-rag adds the policy, the hook, labelled ingest, the evals and the rest. haiku.rag ships almost daily, so upgrades only go through a pull request that has to pass the leak eval, the quality gate and the tests.
+The retrieval engine underneath is [haiku.rag](https://github.com/ggozad/haiku.rag) (MIT, by Yiorgis Gozadinos), pinned exactly at `haiku.rag-slim==0.111.1` and used unmodified through its public API. governed-rag adds the policy, the hook, labelled ingest, the evals and the rest. haiku.rag ships almost daily, so upgrades only go through a pull request that has to pass the leak eval, the quality gate and the tests.
 
 ## A corpus that has something to leak
 

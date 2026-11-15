@@ -170,7 +170,7 @@ A post-check block during the leak eval counts as a failure even with zero leaks
 
 ## What's haiku.rag, what's ours
 
-**haiku.rag** (MIT, by Yiorgis Gozadinos) provides document storage in LanceDB, hybrid vector and full-text search, the hook system, and the client API. It is pinned at `haiku.rag-slim==0.111.0` and used unmodified through its public API.
+**haiku.rag** (MIT, by Yiorgis Gozadinos) provides document storage in LanceDB, hybrid vector and full-text search, the hook system, and the client API. It is pinned at `haiku.rag-slim==0.111.1` and used unmodified through its public API.
 
 **governed-rag** adds the policy model and validation, the two-layer ACL hook, request-scoped identity, labelled ingest with sync and the contract gate, the offline embedder, extractive cited answers, the audit log, the leak and quality evals, snapshots and drift, the CLI, the GitHub Action, and the synthetic corpus.
 

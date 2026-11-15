@@ -8,7 +8,7 @@ unmodified dependencies (not vendored, not forked):
   Copyright 2025 Yiorgis Gozadinos. MIT License.
   governed-rag uses haiku.rag-slim through its public API only: HaikuRAG
   client, AppConfig, import_document, search, and the Hook base class
-  registered via the `haiku.rag.hooks` entry point. Pinned at 0.111.0.
+  registered via the `haiku.rag.hooks` entry point. Pinned at 0.111.1.
 
 - PyYAML (https://github.com/yaml/pyyaml), MIT License
 - rich (https://github.com/Textualize/rich), MIT License

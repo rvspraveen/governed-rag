@@ -29,4 +29,4 @@ governed-rag v0.1 is a working reference for permission-aware retrieval, not a c
 - **Python 3.12 or newer**, because haiku.rag requires it. rag-eval-gate needs 3.10 to 3.12 and an older `openai` that breaks haiku.rag imports, so it must live in a separate virtual environment.
 - **Single process.** The database is a local LanceDB directory. No server mode, no multi-tenant isolation, no concurrent writers.
 - **Not included:** haiku.rag's MCP server, web app, Docker images, S3 storage, and its agent/sandbox features. They are left out until a leak test covers them.
-- **haiku.rag moves fast.** It is pinned exactly at 0.111.0; newer versions are untested here.
+- **haiku.rag moves fast.** It is pinned exactly at 0.111.1; newer versions are untested here.
