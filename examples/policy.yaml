@@ -1,0 +1,14 @@
+# Who may read what. Users belong to groups; groups grant ACL labels.
+# Anyone not listed here (or no user at all) can read nothing.
+version: 1
+labels: [public, finance, hr, legal]
+groups:
+  everyone: [public]
+  finance: [finance]
+  people-team: [hr]
+  legal: [legal]
+users:
+  analyst: [everyone]
+  finance_mgr: [everyone, finance]
+  hr_lead: [everyone, people-team]
+  counsel: [everyone, legal]

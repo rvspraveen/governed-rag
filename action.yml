@@ -1,0 +1,53 @@
+name: "governed-rag leak gate"
+description: "Ingest a labelled corpus with permission-aware RAG (haiku.rag) and fail if any user can retrieve documents they may not read."
+branding:
+  icon: "lock"
+  color: "blue"
+inputs:
+  corpus:
+    description: "Directory of Markdown documents with `acl` front matter"
+    required: true
+  policy:
+    description: "Access policy YAML"
+    required: true
+  leak-cases:
+    description: "Leak cases YAML (see evals/leak_cases.yaml)"
+    required: true
+  contract:
+    description: "Optional corpusgate YAML enforced before ingest"
+    required: false
+    default: ""
+  python-version:
+    description: "Python version (3.12 or newer)"
+    required: false
+    default: "3.12"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install governed-rag
+      shell: bash
+      env:
+        GRAG_CONTRACT: ${{ inputs.contract }}
+      run: |
+        python -m pip install --disable-pip-version-check -q "${GITHUB_ACTION_PATH}"
+        if [ -n "${GRAG_CONTRACT}" ]; then
+          python -m pip install --disable-pip-version-check -q \
+            "corpusgate @ git+https://github.com/rvspraveen/corpusgate@v0.2.0"
+        fi
+    - name: Ingest and run the leak eval
+      shell: bash
+      env:
+        GRAG_CORPUS: ${{ inputs.corpus }}
+        GRAG_POLICY: ${{ inputs.policy }}
+        GRAG_CASES: ${{ inputs.leak-cases }}
+        GRAG_CONTRACT: ${{ inputs.contract }}
+      run: |
+        db="${RUNNER_TEMP}/grag.lancedb"
+        extra=()
+        if [ -n "${GRAG_CONTRACT}" ]; then extra+=(-c "${GRAG_CONTRACT}"); fi
+        grag ingest "${GRAG_CORPUS}" -p "${GRAG_POLICY}" --db "${db}" "${extra[@]}"
+        grag eval leak --cases "${GRAG_CASES}" --corpus "${GRAG_CORPUS}" -p "${GRAG_POLICY}" --db "${db}" \
+          | tee -a "${GITHUB_STEP_SUMMARY}"

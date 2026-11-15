@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  # The contract gate is installed from its release tag; rag-eval-gate from main until it is tagged.
+  RCC: "corpusgate @ git+https://github.com/rvspraveen/corpusgate@v0.2.0"
+  REG: "rag-eval-gate @ git+https://github.com/rvspraveen/rag-eval-gate@main"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # haiku.rag requires Python >= 3.12.
+        python-version: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install -e ".[dev]" "$RCC"
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Tests (coverage gate 90%)
+        run: pytest
+      - name: Security scan (bandit)
+        run: bandit -q -r src
+      - name: Dependency audit (pip-audit)
+        run: pip-audit --skip-editable
+
+  dogfood:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install . "$RCC"
+      - name: Corpus and eval cases are reproducible
+        run: |
+          python examples/make_corpus.py
+          git diff --exit-code examples/ evals/
+      - name: Broken corpus must be refused (exit 1) with nothing written
+        run: |
+          set +e
+          grag ingest examples/corpus_bad -c examples/contract.yaml -p examples/policy.yaml --db bad.lancedb
+          code=$?
+          set -e
+          test "$code" -eq 1
+          test ! -e bad.lancedb
+      - name: Sample corpus passes its contract and ingests
+        run: grag ingest examples/corpus -c examples/contract.yaml -p examples/policy.yaml
+      - name: Leak eval must stay at zero
+        run: grag eval leak --corpus examples/corpus -p examples/policy.yaml
+      - name: Export quality run for rag-eval-gate
+        run: grag eval quality --corpus examples/corpus --out-dir out -p examples/policy.yaml
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quality-run
+          path: out/
+      - name: README output is real and current
+        run: |
+          python scripts/build_readme.py
+          git diff --exit-code README.md
+
+  quality-gate:
+    # rag-eval-gate needs Python <= 3.12 and an older openai, so it runs in its own job.
+    needs: dogfood
+    runs-on: ubuntu-latest
+    env:
+      CONTINUOUS_EVAL_DO_NOT_TRACK: "true"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: quality-run
+          path: out/
+      - run: |
+          python -m pip install "$REG"
+          reg setup
+      - name: Answer quality must not regress against the baseline
+        run: |
+          set +e
+          reg gate -d out/dataset.jsonl -r out/run.jsonl -b evals/quality_baseline.json -g evals/quality_gate.yaml -f markdown -o quality.md
+          code=$?
+          set -e
+          cat quality.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
+
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Action passes on the sample corpus
+        uses: ./
+        with:
+          corpus: examples/corpus
+          policy: examples/policy.yaml
+          leak-cases: evals/leak_cases.yaml
+      - name: Action fails on the broken corpus
+        id: bad
+        continue-on-error: true
+        uses: ./
+        with:
+          corpus: examples/corpus_bad
+          policy: examples/policy.yaml
+          leak-cases: evals/leak_cases.yaml
+      - name: Assert the broken corpus failed
+        if: steps.bad.outcome != 'failure'
+        run: exit 1

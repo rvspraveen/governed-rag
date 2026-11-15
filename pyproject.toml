@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "governed-rag"
+dynamic = ["version"]
+description = "Permission-aware RAG on haiku.rag: per-user access control, audit log, leak and drift evals."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.12"
+keywords = ["rag", "access-control", "governance", "llm", "security", "haiku-rag", "evaluation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Security",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  # Exact pin: haiku.rag ships almost daily. Upgrades only via a PR that passes the leak eval.
+  "haiku.rag-slim==0.111.0",
+  "pyyaml>=6.0",
+  "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5", "pytest-asyncio>=0.23", "ruff>=0.6", "bandit>=1.7", "pip-audit>=2.7"]
+
+[project.scripts]
+grag = "governed_rag.cli:main"
+
+[project.entry-points."haiku.rag.hooks"]
+governed_acl = "governed_rag.hook:GovernedAclHook"
+
+[project.urls]
+Upstream = "https://github.com/ggozad/haiku.rag"
+
+[tool.hatch.version]
+path = "src/governed_rag/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/governed_rag"]
+
+[tool.ruff]
+line-length = 160
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S608"]
+"src/governed_rag/acl.py" = ["S608"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--cov=governed_rag --cov-report=term-missing --cov-fail-under=90"
+filterwarnings = ["ignore::DeprecationWarning"]

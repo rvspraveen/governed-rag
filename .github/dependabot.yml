@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # haiku.rag-slim is pinned exactly on purpose; Dependabot PRs for it must pass the leak eval.
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"

@@ -1,0 +1,13 @@
+# rag-eval-gate config for governed-rag's own answers (see README "Quality gate").
+# Retrieval runs through the ACL hook, so this also catches enforcement that
+# starts over-blocking documents the caller is allowed to read.
+metrics:
+  context_recall:             {max_drop: 0.05, min: 0.90}
+  ndcg:                       {max_drop: 0.05}
+  token_overlap_faithfulness: {max_drop: 0.05, min: 0.90}
+  rouge_l_recall:             {max_drop_rel: 0.10, severity: warn}
+
+bootstrap: {samples: 2000, confidence: 0.95, seed: 7}
+min_items: 20
+item_drop: 0.10
+max_items_listed: 10

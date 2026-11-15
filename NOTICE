@@ -1,0 +1,26 @@
+governed-rag
+Copyright (c) 2026 Praveen RVS. Licensed under the MIT License.
+
+This project depends on the following third-party software, used as
+unmodified dependencies (not vendored, not forked):
+
+- haiku.rag (https://github.com/ggozad/haiku.rag)
+  Copyright 2025 Yiorgis Gozadinos. MIT License.
+  governed-rag uses haiku.rag-slim through its public API only: HaikuRAG
+  client, AppConfig, import_document, search, and the Hook base class
+  registered via the `haiku.rag.hooks` entry point. Pinned at 0.111.0.
+
+- PyYAML (https://github.com/yaml/pyyaml), MIT License
+- rich (https://github.com/Textualize/rich), MIT License
+
+Optional, used only by `grag ingest --contract` and CI:
+
+- corpusgate, MIT License, which depends on wimsey
+  (https://github.com/benrutter/wimsey, MIT License, Ben Rutter).
+- rag-eval-gate, MIT License, which depends on continuous-eval
+  (https://github.com/relari-ai/continuous-eval, Apache License 2.0,
+  Relari, Inc.). Installed in a separate environment in CI.
+
+The sample corpus in examples/ is synthetic. Northwind Renewables and every
+person, figure, phone number (555-01xx) and email address (example.com) in it
+are fictional.
